@@ -46,4 +46,4 @@ The production build statically prerenders the shell routes and keeps `/modules/
 
 ## API Notes
 
-The API inventory and source-code findings are documented in `../WEB_FINDINGS.md`. Where UI behavior depends on backend support, the interface stays explicit: device OTA upload lands the image in `/tmp`, and the future update trigger step remains disabled until the server/client command exists.
+The API inventory and source-code findings are documented in `../docs/WEB_FINDINGS.md`. Where UI behavior depends on backend support, the interface stays explicit: device OTA upload lands the image in `/tmp`, and the future update trigger step remains disabled until the server/client command exists.
