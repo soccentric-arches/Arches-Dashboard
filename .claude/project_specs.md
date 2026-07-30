@@ -1,17 +1,18 @@
 # Arches-Dashboard — specs
 
 Remote: `git@github.com:SiliconCentric/Arches-Dashboard.git`
-Parent project: Arches (target hardware: NVIDIA Jetson, Tegra family, L4T/JetPack OS, with an STM32 real-time co-processor)
-Leaf type: `<Project>-Dashboard`
-Status: REAL — actively built out (corrected 2026-07-29; this file described the repo as a stub with no source files, which was wrong, and it is the file the Loop Engine reads for context)
-Stack: node (see `loop/fleet-deps.yaml` and `tools/validate/stack.txt`)
+Stack: node.
 
-## What this is
+A standalone dashboard UI leaf. Runs anywhere; not part of the on-device image.
 
-A standalone dashboard UI leaf: a Next.js app-router frontend under `webui/`, a separate pytest contract-test suite under `contract-tests/`, and docker packaging under `docker/`.
+## Layout
 
-Distinct from Arches-Configuration's on-device dashboard. Both exist and they are different things: Configuration's UI ships onto the Jetson inside the OS image; this one is a standalone app. Don't conflate them.
+* `webui/` — Next.js app-router frontend. Has its own `package.json`, separate from the root one.
+* `contract-tests/` — pytest suite with its own Makefile. Python, not JS.
+* `docker/` — packaging.
 
-Not proto-coupled to Arches-HAL. It reads from Arches-Server over HTTP/SSE, which is why `contract-tests/` exists — and why a Server-side change can break this repo without touching a line of its code.
+## Coupling
 
-Part of the Arches project in the project-managers fleet. See `docs/project-managers.md` for the full 9-project / 8-leaf hierarchy and shared conventions.
+* **Not proto-coupled to Arches-HAL.** Reads from Arches-Server over HTTP/SSE.
+* That HTTP/SSE surface is the whole dependency, and it is not compile-checked — which is why `contract-tests/` exists, and why a Server-side change can break this repo without touching its code.
+* **Distinct from Arches-Configuration's on-device dashboard.** Configuration's UI ships onto the Jetson inside the OS image. This one does not.

@@ -1,21 +1,30 @@
-# CLAUDE.md - Arches-Dashboard
+# Arches-Dashboard
 
-See [project_specs.md](project_specs.md) for what this repo is and how it fits the fleet.
+Standalone dashboard UI. Next.js app-router frontend, a separate pytest contract-test suite, and
+docker packaging. Not the on-device UI.
 
-## Commands
+## How you work here
 
-* Install deps: `make install`
-* Dev server: `make dev`
-* Build: `make build`
-* Test: `make test`
-* Lint: `make lint`
-* Gate: `./.claude/validate.sh [quick|full]`
+* Commands: `.claude/commands/` — test, lint, validate.
+* Write: frontend under `webui/`, contract tests under `contract-tests/` (Python, own Makefile), packaging under `docker/`.
+* Test: run `make install` first. Without `node_modules` the gate reports `77` rather than a false failure.
 
-## Notes
+## How you validate
 
-* `make lint` / `build` / `test` all need `node_modules`. Without them the repo's gate reports GATE-BLOCKED (exit 77) rather than a false FAIL — run `make install` first. `loop/tools/preflight.sh` in the master repo checks for this before a loop is allowed to run.
-* Two package manifests (`package.json` and `webui/package.json`). The gate requires a lockfile beside each one; a drifted lockfile is how a build that works here fails in CI against a different dependency tree.
-* `contract-tests/` is Python, not JS, and has its own Makefile. Tests there made conditional on a reachable Server are the pattern the Loop Engine's auditor looks at hardest — if you make one conditional, say why in the commit message.
+* Gate: `./.claude/validate.sh quick` (seconds) or `full` (adds build + tests). Run it before you claim done.
+* Exit codes: `0` pass, `1`-`76` fail, `77` a check never ran. **77 is not a pass.**
+* The gate and everything under `.claude/lib`, `hooks`, `commands`, `settings.json` is human-owned. Run it, never edit it.
+
+## Do
+
+* Run `make install` before lint, build or test. Everything needs `node_modules`.
+* Keep a lockfile beside each of the two package manifests (`package.json` and `webui/package.json`). The gate requires both — a drifted lockfile is how a build that works locally fails in CI against a different dependency tree.
+* Say why in the commit message if you make a contract test conditional. Tests made conditional on a reachable Server are the pattern the Loop Engine's auditor looks at hardest.
+
+## Don't
+
+* **Don't conflate this with Arches-Configuration's on-device dashboard.** Both exist and they are different things: Configuration's UI ships onto the Jetson inside the OS image, this one is a standalone app.
+* **Don't assume a Server change is safe for this repo.** It reads from Arches-Server over HTTP/SSE, so a Server-side change can break it without touching a line here. That is what `contract-tests/` is for.
 
 <!-- BEGIN loop-engine -->
 ## Do's and Don'ts (maintained by the Loop Engine)
