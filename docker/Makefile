@@ -7,7 +7,7 @@
 #
 # Variables (override on CLI, e.g. make build TAG=v1.2.3)
 # ──────────────────────────────────────────────────────────────────────────────
-IMAGE    ?= acadia-dashboard
+IMAGE    ?= arches-dashboard
 TAG      ?= latest
 PORT     ?= 3010
 CONTEXT  ?= ..                   # build context = repo root
