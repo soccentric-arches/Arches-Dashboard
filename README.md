@@ -37,7 +37,7 @@ No manual verification is implied by frontend source or unit tests.
 
 ## Validation Commands
 
-`cd webui && npm test`; `cd webui && npm run build`; `cd contract-tests && pytest`.
+`cd webui && npm test`; `make build` (Docker image build); `cd contract-tests && pytest`.
 
 ## Existing Documentation
 
