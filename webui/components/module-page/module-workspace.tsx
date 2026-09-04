@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn, formatClock, formatDuration, formatRunDuration, resultVariant, statusVariant } from "@/lib/utils";
-import { Activity, ChevronDown, Settings2 } from "lucide-react";
+import { Activity, ChevronDown, RefreshCw, Settings2 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import {
   CartesianGrid,
@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { getRunResults, getRuns } from "@/lib/api";
+import { getTestPlanConfig, setModuleEnabled as putModuleEnabled, setTestEnabled as putTestEnabled } from "@/lib/api/testPlanConfig";
 import { testsForModule, type ModuleTestDefinition, type ModuleTestField } from "@/lib/modules/catalog";
 import { parseSsePayload, openSse } from "@/lib/sse";
 import type { ExecutionMode, ModuleInfo, Run, RunEventState, TestResult } from "@/lib/types/api";
@@ -55,31 +56,21 @@ function toChartRows(results: TestResult[]) {
 }
 
 type TestValue = boolean | number | string;
-type TestPlanState = Record<string, { enabled: boolean; fields: Record<string, TestValue> }>;
+// Enable/disable state lives in test-plan.yaml (data/config/), fetched via
+// the test-plan-config query — this only tracks each test's field values,
+// which stay local to the browser.
+type TestPlanState = Record<string, { fields: Record<string, TestValue> }>;
 
-// v2: tests default to disabled now, so a plan saved under the old key
-// (tests enabled by default) is intentionally not read back here.
 function testPlanStorageKey(moduleId: string): string {
-  return `${PLATFORM_SLUG}.module-tests.v2.${moduleId}`;
+  return `${PLATFORM_SLUG}.module-tests.v3.${moduleId}`;
 }
 
-function moduleEnabledStorageKey(moduleId: string): string {
-  return `${PLATFORM_SLUG}.module-enabled.${moduleId}`;
-}
-
-function loadModuleEnabled(moduleId: string): boolean {
-  if (typeof window === "undefined") return true;
-  const raw = window.localStorage.getItem(moduleEnabledStorageKey(moduleId));
-  return raw === null ? true : raw === "true";
-}
 
 function initialTestPlan(moduleId: string, tests: ModuleTestDefinition[]): TestPlanState {
   const defaults = Object.fromEntries(
     tests.map((test) => [
       test.id,
       {
-        // Off by default — the operator opts in to each test they want to run.
-        enabled: false,
         fields: Object.fromEntries(test.fields.map((field) => [field.key, field.defaultValue])),
       },
     ]),
@@ -97,7 +88,6 @@ function initialTestPlan(moduleId: string, tests: ModuleTestDefinition[]): TestP
         tests.map((test) => [
           test.id,
           {
-            enabled: parsed[test.id]?.enabled ?? defaults[test.id].enabled,
             fields: { ...defaults[test.id].fields, ...(parsed[test.id]?.fields ?? {}) },
           },
         ]),
@@ -134,10 +124,28 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
   const [now, setNow] = useState(() => Date.now());
   const moduleTests = useMemo(() => testsForModule(module), [module]);
   const [testPlan, setTestPlan] = useState<TestPlanState>(() => initialTestPlan(module.id, moduleTests));
-  const [moduleEnabled, setModuleEnabled] = useState<boolean>(() => loadModuleEnabled(module.id));
   const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
   const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
   const selectTest = (id: string) => setSelectedTestId((prev) => (prev === id ? null : id));
+  const queryClient = useQueryClient();
+
+  // Enable/disable state — for the module itself and each test — is sourced
+  // from test-plan.yaml (data/config/) via the API route, not localStorage.
+  // Everything defaults to disabled until the operator opts in, either in
+  // the UI or by hand-editing the file and pressing "Reload config".
+  const {
+    data: testPlanConfig,
+    refetch: refetchTestPlanConfig,
+    isFetching: isReloadingTestPlanConfig,
+  } = useQuery({
+    queryKey: ["test-plan-config"],
+    queryFn: getTestPlanConfig,
+  });
+  const moduleEnabled = testPlanConfig?.modules?.[module.id]?.enabled ?? false;
+  const testEnabledMap = useMemo(
+    () => testPlanConfig?.modules?.[module.id]?.tests ?? {},
+    [testPlanConfig, module.id],
+  );
 
   const toggleExpand = (testId: string) => {
     setExpandedTests((prev) => {
@@ -236,20 +244,15 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
     window.localStorage.setItem(testPlanStorageKey(module.id), JSON.stringify(testPlan));
   }, [module.id, testPlan]);
 
-  useEffect(() => {
-    window.localStorage.setItem(moduleEnabledStorageKey(module.id), String(moduleEnabled));
-  }, [module.id, moduleEnabled]);
-
-  const toggleModuleEnabled = () => {
+  const toggleModuleEnabled = async () => {
     if (isRunning) return;
-    setModuleEnabled((prev) => !prev);
+    const updated = await putModuleEnabled(module.id, !moduleEnabled);
+    queryClient.setQueryData(["test-plan-config"], updated);
   };
 
-  const setTestEnabled = (testId: string, enabled: boolean) => {
-    setTestPlan((previous) => ({
-      ...previous,
-      [testId]: { ...previous[testId], enabled },
-    }));
+  const setTestEnabled = async (testId: string, enabled: boolean) => {
+    const updated = await putTestEnabled(module.id, testId, enabled);
+    queryClient.setQueryData(["test-plan-config"], updated);
   };
 
   const setFieldValue = (testId: string, field: ModuleTestField, value: TestValue) => {
@@ -266,8 +269,8 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
   };
 
   const activeEnabledTests = useMemo(() => {
-    return moduleTests.filter((test) => test.modes.includes(mode) && (testPlan[test.id]?.enabled ?? false));
-  }, [mode, moduleTests, testPlan]);
+    return moduleTests.filter((test) => test.modes.includes(mode) && (testEnabledMap[test.id] ?? false));
+  }, [mode, moduleTests, testEnabledMap]);
 
   const activeModuleConfig = useMemo(() => {
     return {
@@ -382,7 +385,7 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
               <Switch
                 checked={moduleEnabled}
                 disabled={isRunning}
-                onClick={toggleModuleEnabled}
+                onClick={() => void toggleModuleEnabled()}
                 aria-label={moduleEnabled ? "Disable module" : "Enable module"}
               />
               <span className={cn("text-xs font-semibold", moduleEnabled ? "text-success" : "text-destructive")}>
@@ -413,7 +416,17 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
       <Card className={cn(!moduleEnabled && "opacity-60 pointer-events-none")}>
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle>HAL Test Suite</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle>HAL Test Suite</CardTitle>
+              <button
+                type="button"
+                title="Reload enable/disable state from data/config/test-plan.yaml"
+                onClick={() => void refetchTestPlanConfig()}
+                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <RefreshCw size={14} className={cn(isReloadingTestPlanConfig && "animate-spin")} />
+              </button>
+            </div>
             {!moduleEnabled ? (
               <Badge variant="destructive">Module disabled — excluded from runs</Badge>
             ) : (
@@ -453,7 +466,7 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
               <tbody>
                 {moduleTests.map((test) => {
                   const plan = testPlan[test.id];
-                  const enabled = plan?.enabled ?? true;
+                  const enabled = testEnabledMap[test.id] ?? false;
                   const modeCompatible = test.modes.includes(mode);
                   const isExpanded = expandedTests.has(test.id);
                   const hasFields = test.fields.length > 0;
@@ -533,7 +546,7 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
                             <Switch
                               checked={enabled}
                               disabled={isRunning}
-                              onClick={(e) => { e.stopPropagation(); setTestEnabled(test.id, !enabled); }}
+                              onClick={(e) => { e.stopPropagation(); void setTestEnabled(test.id, !enabled); }}
                               aria-label={`${enabled ? "Disable" : "Enable"} ${test.name}`}
                             />
                           </div>

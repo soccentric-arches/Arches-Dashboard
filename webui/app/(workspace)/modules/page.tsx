@@ -1,10 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowRight, Cpu, Search, X } from "lucide-react";
+import { ArrowRight, Cpu, RefreshCw, Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getModules, getRuns, getRunResults } from "@/lib/api";
+import { getTestPlanConfig, setModuleEnabled as putModuleEnabled } from "@/lib/api/testPlanConfig";
 import { modulesForOfflineDisplay, writeCachedModules } from "@/lib/modules/catalog";
-import { PLATFORM_SLUG } from "@/lib/platform";
 
 interface ModuleSummary {
     lastRun: string; // ISO timestamp of the most recent test result
@@ -30,20 +30,8 @@ function formatRunTime(iso: string): string {
     });
 }
 
-const MODULE_ENABLED_PREFIX = `${PLATFORM_SLUG}.module-enabled.`;
-
-function loadAllModuleEnabled(moduleIds: string[]): Record<string, boolean> {
-    return Object.fromEntries(
-        moduleIds.map((id) => {
-            const raw = typeof window !== "undefined"
-                ? window.localStorage.getItem(MODULE_ENABLED_PREFIX + id)
-                : null;
-            return [id, raw === null ? true : raw === "true"];
-        }),
-    );
-}
-
 function ModulesContent() {
+    const queryClient = useQueryClient();
     const { data: liveModules, isLoading, isError, refetch } = useQuery({
         queryKey: ["modules"],
         queryFn: getModules,
@@ -54,6 +42,14 @@ function ModulesContent() {
     }, [liveModules]);
 
     const modules = useMemo(() => modulesForOfflineDisplay(liveModules), [liveModules]);
+
+    // Enable/disable state is sourced from the test-plan.yaml config file
+    // (data/config/) via the API route, not localStorage — see
+    // lib/server/testPlanConfig.ts. Everything defaults to disabled.
+    const { data: testPlanConfig, refetch: refetchTestPlan, isFetching: isReloadingTestPlan } = useQuery({
+        queryKey: ["test-plan-config"],
+        queryFn: getTestPlanConfig,
+    });
 
     // Fetch recent runs to find the latest completed one
     const { data: runsData } = useQuery({
@@ -94,26 +90,22 @@ function ModulesContent() {
     }, [latestResultsData]);
 
     const [search, setSearch] = useState("");
-    const [moduleEnabledOverrides, setModuleEnabledOverrides] = useState<Record<string, boolean>>({});
 
     const searchParams = useSearchParams();
     const urlFilter = searchParams.get("filter") ?? ""; // "disabled" | "failed" | ""
 
-    const storedModuleEnabled = useMemo(() => loadAllModuleEnabled(modules.map((m) => m.id)), [modules]);
-    const moduleEnabled = useMemo(
-        () => ({ ...storedModuleEnabled, ...moduleEnabledOverrides }),
-        [moduleEnabledOverrides, storedModuleEnabled],
-    );
+    // Off by default — a module only counts as enabled once test-plan.yaml
+    // says so (via the API route or a hand edit + reload).
+    const moduleEnabled = useMemo(() => {
+        const map: Record<string, boolean> = {};
+        for (const m of modules) map[m.id] = testPlanConfig?.modules?.[m.id]?.enabled ?? false;
+        return map;
+    }, [modules, testPlanConfig]);
 
-    const toggleEnabled = (id: string) => {
-        const nextValue = !(moduleEnabled[id] ?? true);
-        setModuleEnabledOverrides((prev) => {
-            const next = { ...prev, [id]: nextValue };
-            if (typeof window !== "undefined") {
-                window.localStorage.setItem(MODULE_ENABLED_PREFIX + id, String(nextValue));
-            }
-            return next;
-        });
+    const toggleEnabled = async (id: string) => {
+        const nextValue = !(moduleEnabled[id] ?? false);
+        const updated = await putModuleEnabled(id, nextValue);
+        queryClient.setQueryData(["test-plan-config"], updated);
     };
 
     const filtered = useMemo(() => {
@@ -142,7 +134,7 @@ function ModulesContent() {
     }, [filtered]);
 
     const enabledCount = useMemo(
-        () => modules.filter((m) => moduleEnabled[m.id] !== false).length,
+        () => modules.filter((m) => moduleEnabled[m.id] === true).length,
         [modules, moduleEnabled],
     );
 
@@ -179,6 +171,15 @@ function ModulesContent() {
                             />
                         </div>
                         <Button type="button" variant="outline" onClick={() => void refetch()}>Refresh</Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            title="Reload enable/disable state from data/config/test-plan.yaml"
+                            onClick={() => void refetchTestPlan()}
+                        >
+                            <RefreshCw size={14} className={cn("mr-1", isReloadingTestPlan && "animate-spin")} />
+                            Reload config
+                        </Button>
                     </div>
                 </CardHeader>
             </Card >
@@ -249,7 +250,7 @@ function ModulesContent() {
                                                 <span>{enabled ? "On" : "Off"}</span>
                                                 <Switch
                                                     checked={enabled}
-                                                    onClick={(e) => { e.preventDefault(); toggleEnabled(module.id); }}
+                                                    onClick={(e) => { e.preventDefault(); void toggleEnabled(module.id); }}
                                                     aria-label={enabled ? "Disable module" : "Enable module"}
                                                 />
                                             </div>

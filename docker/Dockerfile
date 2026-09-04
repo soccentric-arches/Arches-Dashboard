@@ -39,6 +39,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3010
+# Where the test-plan.yaml (module/test enablement) lives — bind-mounted
+# from ../data/config on the host by docker/Makefile's `run` target.
+ENV CONFIG_DIR=/app/data/config
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs \
