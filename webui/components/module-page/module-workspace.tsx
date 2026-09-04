@@ -76,7 +76,8 @@ function initialTestPlan(moduleId: string, tests: ModuleTestDefinition[]): TestP
     tests.map((test) => [
       test.id,
       {
-        enabled: true,
+        // Off by default — the operator opts in to each test they want to run.
+        enabled: false,
         fields: Object.fromEntries(test.fields.map((field) => [field.key, field.defaultValue])),
       },
     ]),
@@ -263,7 +264,7 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
   };
 
   const activeEnabledTests = useMemo(() => {
-    return moduleTests.filter((test) => test.modes.includes(mode) && (testPlan[test.id]?.enabled ?? true));
+    return moduleTests.filter((test) => test.modes.includes(mode) && (testPlan[test.id]?.enabled ?? false));
   }, [mode, moduleTests, testPlan]);
 
   const activeModuleConfig = useMemo(() => {

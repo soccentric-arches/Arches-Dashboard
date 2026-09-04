@@ -213,7 +213,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <div className="flex">
+      <div className="mx-auto flex max-w-6xl">
         <Sidebar
           collapsed={sidebarCollapsed}
           setCollapsed={setSidebarCollapsed}
@@ -223,7 +223,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onRegisterSearchFocus={registerModuleSearchFocus}
         />
 
-        <main className="min-h-[calc(100vh-var(--shell-header-height))] flex-1 overflow-auto p-5">{children}</main>
+        <main className="min-h-[calc(100vh-var(--shell-header-height))] flex-1 overflow-auto p-5">
+          {/* Keyed by route so navigation retriggers the fade-in instead
+              of only playing once on first mount. */}
+          <div key={pathname} className="animate-fade-in">{children}</div>
+        </main>
       </div>
 
       <HelpShortcutsDialog open={showHelp} onClose={() => setShowHelp(false)} />

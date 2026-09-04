@@ -125,6 +125,11 @@
   --radius-2xl: calc(var(--radius) + 8px);
 }
 
+/* Native browser page transitions (Chromium) — a no-op elsewhere. */
+@view-transition {
+  navigation: auto;
+}
+
 /* ─── Base styles ─────────────────────────────────────────────────── */
 * {
   border-color: hsl(var(--border));
@@ -132,10 +137,47 @@
   scrollbar-color: hsl(var(--border)) transparent;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  /* Stylistic set + tabular numerals so run timers and counters don't
+     jitter in width as digits change. */
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth, consistent motion on every interactive surface by default so
+   individual components don't need to remember a transition utility.
+   Kept to color/background/border/shadow/transform — never layout
+   properties — so it can't introduce jank. */
+@media (prefers-reduced-motion: no-preference) {
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  [role="switch"],
+  [role="tab"] {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ─── Dark-mode ambience: soft aurora glows behind translucent UI ───
@@ -184,4 +226,21 @@ textarea {
 
 .animate-expand-down {
   animation: expand-down 0.18s ease-out;
+}
+
+/* ─── Page/panel fade-in ──────────────────────────────────────────── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in-up 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
