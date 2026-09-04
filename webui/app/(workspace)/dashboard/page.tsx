@@ -230,13 +230,13 @@ export default function DashboardPage() {
                     {Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
                 </section>
             ) : (
-                <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <section className="stagger grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     <Card
                         role="link"
                         tabIndex={0}
                         onClick={() => router.push("/modules")}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") router.push("/modules"); }}
-                        className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="card-hover cursor-pointer hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <CardHeader className="pb-2">
                             <CardDescription>Modules</CardDescription>
@@ -260,7 +260,7 @@ export default function DashboardPage() {
                         tabIndex={0}
                         onClick={() => router.push("/modules")}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") router.push("/modules"); }}
-                        className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="card-hover cursor-pointer hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <CardHeader className="pb-2">
                             <CardDescription>Tests</CardDescription>
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                         tabIndex={0}
                         onClick={() => router.push("/runs")}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") router.push("/runs"); }}
-                        className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="card-hover cursor-pointer hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <CardHeader className="pb-2">
                             <CardDescription>Last Run</CardDescription>
@@ -312,7 +312,7 @@ export default function DashboardPage() {
                         tabIndex={0}
                         onClick={() => router.push("/settings")}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") router.push("/settings"); }}
-                        className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="card-hover cursor-pointer hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         <CardHeader className="pb-2">
                             <CardDescription>Server version</CardDescription>

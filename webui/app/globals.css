@@ -35,9 +35,9 @@
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
   --radius: 0.5rem;
-  /* Opaque card surface in light mode. Overridden to translucent in
-     .dark so the ambient body glows show through (glass effect). */
-  --alpha-card: 1;
+  /* Slightly translucent even in light mode so the ambient glow behind
+     it (see "body" below) reads as glass rather than a flat panel. */
+  --alpha-card: 0.92;
 }
 
 @media (min-width: 48rem) {
@@ -182,25 +182,32 @@ body {
   }
 }
 
-/* ─── Dark-mode ambience: soft aurora glows behind translucent UI ───
+/* ─── Ambience: soft glows behind translucent UI, both themes ───────
    The app shell paints no background of its own, so these gradients
    show through every translucent surface (top bar, sidebar, cards).
    Fixed attachment keeps the glows stationary while the page scrolls,
    which is what sells the glass effect. */
-.dark body {
+body {
   background-attachment: fixed;
+  background-image:
+    radial-gradient(52rem 34rem at 12% -8%, hsl(255 70% 60% / 0.05), transparent 65%),
+    radial-gradient(46rem 30rem at 105% 12%, hsl(190 80% 50% / 0.04), transparent 60%),
+    radial-gradient(60rem 42rem at 50% 118%, hsl(285 70% 55% / 0.04), transparent 65%);
+}
+
+.dark body {
   background-image:
     radial-gradient(52rem 34rem at 12% -8%, hsl(255 85% 60% / 0.10), transparent 65%),
     radial-gradient(46rem 30rem at 105% 12%, hsl(190 90% 45% / 0.08), transparent 60%),
     radial-gradient(60rem 42rem at 50% 118%, hsl(285 80% 55% / 0.07), transparent 65%);
 }
 
-/* Card surfaces are translucent in dark mode (--alpha-card); blur
-   whatever is behind them so overlaid content stays legible. Scoped
-   to the `.bg-card` utility so every card-like surface — Card, the
-   help dialog panel, page-level summaries — picks this up without
-   each component remembering to add backdrop-blur. */
-.dark .bg-card {
+/* Card surfaces are translucent (--alpha-card); blur whatever is behind
+   them so overlaid content stays legible. Scoped to the `.bg-card`
+   utility so every card-like surface — Card, the help dialog panel,
+   page-level summaries — picks this up without each component
+   remembering to add backdrop-blur. */
+.bg-card {
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
@@ -288,4 +295,79 @@ h1 {
     background-image: none;
     background-color: hsl(var(--muted));
   }
+}
+
+/* ─── Staggered grid entrance — apply `.stagger` to a grid/list container
+   so its children fade/slide in one after another instead of all at once.
+   Covers up to 16 items; anything beyond that just uses the last delay. */
+.stagger>* {
+  animation: fade-in-up 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stagger>*:nth-child(n+1) {
+    animation-delay: 0ms;
+  }
+
+  .stagger>*:nth-child(n+2) {
+    animation-delay: 30ms;
+  }
+
+  .stagger>*:nth-child(n+3) {
+    animation-delay: 60ms;
+  }
+
+  .stagger>*:nth-child(n+4) {
+    animation-delay: 90ms;
+  }
+
+  .stagger>*:nth-child(n+5) {
+    animation-delay: 120ms;
+  }
+
+  .stagger>*:nth-child(n+6) {
+    animation-delay: 150ms;
+  }
+
+  .stagger>*:nth-child(n+7) {
+    animation-delay: 180ms;
+  }
+
+  .stagger>*:nth-child(n+8) {
+    animation-delay: 210ms;
+  }
+
+  .stagger>*:nth-child(n+9) {
+    animation-delay: 240ms;
+  }
+
+  .stagger>*:nth-child(n+10) {
+    animation-delay: 270ms;
+  }
+
+  .stagger>*:nth-child(n+12) {
+    animation-delay: 300ms;
+  }
+
+  .stagger>*:nth-child(n+16) {
+    animation-delay: 330ms;
+  }
+}
+
+/* ─── Card hover lift — a soft rise + deeper shadow on hover, applied via
+   Card's own className so it stays opt-in for non-interactive cards
+   (pass hoverLift={false} or omit the class where a card is static). */
+.card-hover {
+  transition-property: transform, box-shadow, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -12px hsl(var(--foreground) / 0.18);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 16px 32px -14px hsl(0 0% 0% / 0.55);
 }

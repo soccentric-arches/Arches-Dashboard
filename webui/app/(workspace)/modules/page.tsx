@@ -213,12 +213,12 @@ function ModulesContent() {
                             <Badge variant="secondary" className="rounded-full px-2 text-xs tabular-nums">{mods.length}</Badge>
                             <span className="h-px flex-1 bg-border" />
                         </div>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {mods.map((module) => {
                                 const enabled = moduleEnabled[module.id] !== false;
                                 const summary = moduleSummary[module.id] ?? null;
                                 return (
-                                    <Card key={module.id} className={cn("flex h-full flex-col transition-colors", !enabled && "opacity-60")}>
+                                    <Card key={module.id} className={cn("card-hover flex h-full flex-col", !enabled && "opacity-60")}>
                                         <CardHeader>
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="flex flex-wrap items-center gap-1.5">
