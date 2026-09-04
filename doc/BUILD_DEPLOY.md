@@ -42,6 +42,8 @@ The web production bundle is `webui/.next`. `make docker-build IMAGE=<name> TAG=
 
 Persistent Docker data (config, an optional env file, and exported logs) lives under `data/` at the repo root: `data/config` and `data/logs` are bind-mounted into the container at `/app/data/config` and `/app/data/logs`. Drop an env file at `data/config/dashboard.env` and it is automatically passed to the container via `--env-file`.
 
+Module and HAL test enable/disable state is likewise sourced from `data/config/test-plan.yaml`, read/written by the dashboard's own `/api/test-plan` route (`webui/lib/server/testPlanConfig.ts`). Everything defaults to disabled; toggle switches in the UI write back to this file, and a hand edit takes effect on the next reload (or the "Reload config" control in the UI).
+
 Registry publishing, credentials, and cloud deployment are not defined by this repository's Makefiles. Supply those steps through the consuming deployment system only after the image has been tested.
 
 ## 8. Cleanup
