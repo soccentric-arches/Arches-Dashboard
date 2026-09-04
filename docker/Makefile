@@ -12,10 +12,13 @@ TAG      ?= latest
 PORT     ?= 3010
 CONTEXT  ?= ..                   # build context = repo root
 DOCKERFILE ?= $(CURDIR)/Dockerfile
+# Host-persisted config/env and logs, bind-mounted into the container.
+DATA_DIR ?= $(CURDIR)/../data
+ENV_FILE ?= $(DATA_DIR)/config/dashboard.env
 # Primary LAN IP — used to print the network-reachable URL after `make run`.
 HOST_IP ?= $(strip $(shell hostname -I 2>/dev/null | awk '{print $$1}'))
 
-.PHONY: build run stop logs shell clean
+.PHONY: build run stop logs logs-save shell clean
 
 ## build — build the Docker image
 build:
@@ -26,12 +29,17 @@ build:
 
 ## run — run the container in detached mode (replaces any existing one)
 ## Port is published on 0.0.0.0 so the app is reachable from other hosts.
+## Config and logs persist on the host under ../data (see ENV_FILE, DATA_DIR).
 run:
+	@mkdir -p $(DATA_DIR)/config $(DATA_DIR)/logs
 	docker rm -f $(IMAGE) 2>/dev/null || true
 	docker run -d \
 		--name $(IMAGE) \
 		--publish 0.0.0.0:$(PORT):3010 \
 		--restart unless-stopped \
+		--volume $(DATA_DIR)/config:/app/data/config \
+		--volume $(DATA_DIR)/logs:/app/data/logs \
+		$(if $(wildcard $(ENV_FILE)),--env-file $(ENV_FILE),) \
 		$(IMAGE):$(TAG)
 	@echo "Dashboard running at:"
 	@echo "  local:   http://localhost:$(PORT)"
@@ -45,6 +53,12 @@ stop:
 ## logs — tail container logs
 logs:
 	docker logs -f $(IMAGE)
+
+## logs-save — append the container's current logs to ../data/logs/<image>.log
+logs-save:
+	@mkdir -p $(DATA_DIR)/logs
+	docker logs $(IMAGE) >> $(DATA_DIR)/logs/$(IMAGE).log 2>&1
+	@echo "Logs saved to $(DATA_DIR)/logs/$(IMAGE).log"
 
 ## shell — open a shell inside the running container
 shell:

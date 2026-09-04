@@ -44,6 +44,10 @@ ENV PORT=3010
 RUN addgroup --system --gid 1001 nodejs \
  && adduser  --system --uid 1001 nextjs
 
+# Mount points for host-persisted config/logs (see ../data and docker/Makefile).
+RUN mkdir -p /app/data/config /app/data/logs \
+ && chown -R nextjs:nodejs /app/data
+
 # Next.js standalone output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static     ./.next/static

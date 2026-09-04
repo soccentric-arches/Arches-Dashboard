@@ -7,3 +7,14 @@ __pycache__/
 # backstop in case files end up outside it).
 node_modules/
 .next/
+
+# Docker persistent data (config, env files, container logs) — host-mounted
+# into the container by docker/Makefile. Keep the folder structure, not
+# its runtime contents.
+/data/*
+!/data/config/
+!/data/logs/
+/data/config/*
+!/data/config/.gitkeep
+/data/logs/*
+!/data/logs/.gitkeep

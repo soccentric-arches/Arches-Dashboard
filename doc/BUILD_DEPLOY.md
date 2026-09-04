@@ -36,8 +36,11 @@ The web production bundle is `webui/.next`. `make docker-build IMAGE=<name> TAG=
 
 - `make docker-run` starts the image detached, using the Docker Makefile's default port `3010` unless `PORT` is overridden.
 - `make docker-logs` tails container logs.
+- `make docker-logs-save` appends the container's current logs to `data/logs/<image>.log`.
 - `make docker-shell` opens a shell in the running container.
 - `make docker-stop` stops/removes the container.
+
+Persistent Docker data (config, an optional env file, and exported logs) lives under `data/` at the repo root: `data/config` and `data/logs` are bind-mounted into the container at `/app/data/config` and `/app/data/logs`. Drop an env file at `data/config/dashboard.env` and it is automatically passed to the container via `--env-file`.
 
 Registry publishing, credentials, and cloud deployment are not defined by this repository's Makefiles. Supply those steps through the consuming deployment system only after the image has been tested.
 

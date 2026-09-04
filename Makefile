@@ -12,7 +12,11 @@
 #   docker-run   run the container (production, port 3010)
 #   docker-stop  stop and remove the container
 #   docker-logs  tail container logs
+#   docker-logs-save  append container logs to data/logs/<image>.log
 #   clean        remove .next build artefacts
+#
+# Docker persistent data (config, env file, logs) lives under ./data —
+# see data/config and data/logs, bind-mounted by docker/Makefile.
 # ──────────────────────────────────────────────────────────────────────────────
 
 .DEFAULT_GOAL := help
@@ -23,7 +27,7 @@ IMAGE    ?= arches-dashboard
 TAG      ?= latest
 
 .PHONY: dev build test lint install \
-        docker-build docker-run docker-stop docker-logs docker-shell docker-clean \
+        docker-build docker-run docker-stop docker-logs docker-logs-save docker-shell docker-clean \
         clean
 
 # ── Local dev ─────────────────────────────────────────────────────────────────
@@ -58,6 +62,9 @@ docker-stop: ## stop and remove the container
 
 docker-logs: ## tail container logs
 	$(MAKE) -C docker logs IMAGE=$(IMAGE)
+
+docker-logs-save: ## append container logs to data/logs/<image>.log
+	$(MAKE) -C docker logs-save IMAGE=$(IMAGE)
 
 docker-shell: ## open a shell inside the running container
 	$(MAKE) -C docker shell IMAGE=$(IMAGE)
