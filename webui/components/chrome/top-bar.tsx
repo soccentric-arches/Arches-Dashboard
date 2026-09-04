@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { ConnectionIndicator } from "@/components/chrome/connection-indicator";
 import { ModeSwitcher } from "@/components/chrome/mode-switcher";
 import { StartStopButton } from "@/components/chrome/start-stop-button";
+import { ThemeToggle } from "@/components/chrome/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { useAppShell } from "@/state/app-shell-context";
 
@@ -110,6 +111,8 @@ export function TopBar({
           <StartStopButton isRunning={isRunning} elapsedLabel={elapsedLabel} onClick={onStartStop} />
           <Separator orientation="vertical" className="h-5" />
           <ConnectionIndicator online={serverOnline === true} />
+          <Separator orientation="vertical" className="h-5" />
+          <ThemeToggle />
         </div>
       </div>
 

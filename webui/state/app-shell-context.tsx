@@ -14,6 +14,8 @@ import { getHealth } from "@/lib/api";
 import { PLATFORM_SLUG } from "@/lib/platform";
 import type { ExecutionMode, ModuleRunSelection } from "@/lib/types/api";
 
+export type ThemeMode = "system" | "light" | "dark";
+
 // ─── Actions (stable) ────────────────────────────────────────────────────────
 // All consumers that only need to dispatch (call setters) or check
 // `serverOnline` subscribe to this context. The setters are memoized with
@@ -33,7 +35,7 @@ export interface AppShellActions {
   setActiveRunId: (runId: string | null) => void;
   setIsRunning: (running: boolean) => void;
   setReviewingRunId: (runId: string | null) => void;
-  setThemeMode: (mode: "system" | "light" | "dark") => void;
+  setThemeMode: (mode: ThemeMode) => void;
   setActiveModuleSelection: (selection: ModuleRunSelection | null) => void;
   registerModuleSearchFocus: (focusFn: (() => void) | null) => void;
   focusModuleSearch: () => void;
@@ -54,7 +56,7 @@ export interface AppShellState {
   activeRunId: string | null;
   isRunning: boolean;
   reviewingRunId: string | null;
-  themeMode: "system" | "light" | "dark";
+  themeMode: ThemeMode;
   activeModuleSelection: ModuleRunSelection | null;
 }
 
@@ -86,7 +88,7 @@ export function AppShellProvider({ children }: { children: ReactNode }) {
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [reviewingRunId, setReviewingRunId] = useState<string | null>(null);
-  const [themeMode, setThemeMode] = useState<"system" | "light" | "dark">(() => {
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     if (typeof window === "undefined") return "system";
     const storedTheme = window.localStorage.getItem(THEME_KEY);
     if (storedTheme === "light" || storedTheme === "dark" || storedTheme === "system") {
@@ -145,6 +147,26 @@ export function AppShellProvider({ children }: { children: ReactNode }) {
     media.addEventListener("change", apply);
     return () => media.removeEventListener("change", apply);
   }, [themeMode]);
+
+  // Cross-tab sync: the `storage` event only fires for *other* documents,
+  // so this never re-fires for the setItem in the effect above.
+  // `newValue === null` means the other tab cleared the key — snap to the
+  // default ("system"). Malformed values are ignored, keeping the current
+  // mode. Keyed on THEME_KEY per the repo localStorage-pref convention.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== THEME_KEY) return;
+      if (event.newValue === null) {
+        setThemeMode("system");
+        return;
+      }
+      if (event.newValue === "light" || event.newValue === "dark" || event.newValue === "system") {
+        setThemeMode(event.newValue);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [setThemeMode]);
 
   // All setters are stable across renders. Identity never changes,
   // so a consumer of AppShellActionsContext that only calls setters

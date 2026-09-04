@@ -2,6 +2,7 @@
 
 /* ─── shadcn/ui design tokens ─────────────────────────────────────── */
 :root {
+  color-scheme: light;
   --shell-header-height: 5.625rem;
   --background: 0 0% 100%;
   --foreground: 240 10% 3.9%;
@@ -38,6 +39,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
   --card: 240 10% 3.9%;
