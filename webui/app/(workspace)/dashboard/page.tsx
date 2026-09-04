@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getGlobalLogs, getModules, getRuns, getRunResults, getTarget } from "@/lib/api";
+import { getTestPlanConfig } from "@/lib/api/testPlanConfig";
 import { modulesForOfflineDisplay, testsForModule, writeCachedModules } from "@/lib/modules/catalog";
 import { statusVariant } from "@/lib/utils";
 import { useAppShell } from "@/state/app-shell-context";
@@ -107,6 +108,9 @@ export default function DashboardPage() {
     const liveModules = useQuery({ queryKey: ["modules"], queryFn: getModules });
     const runs = useQuery({ queryKey: ["runs", "dashboard"], queryFn: () => getRuns({ limit: 20 }), refetchInterval: 15_000, enabled: serverOnline !== false });
     const logs = useQuery({ queryKey: ["logs", "dashboard"], queryFn: () => getGlobalLogs({ limit: 8 }), refetchInterval: 15_000, enabled: serverOnline !== false });
+    // Same source of truth as the modules page — data/config/test-plan.yaml,
+    // via the API route — not localStorage, which fell out of sync with it.
+    const testPlanConfig = useQuery({ queryKey: ["test-plan-config"], queryFn: getTestPlanConfig });
 
     useEffect(() => {
         if (liveModules.data && liveModules.data.length > 0) writeCachedModules(liveModules.data);
@@ -122,40 +126,12 @@ export default function DashboardPage() {
     );
     const totalTests = useMemo(() => modules.reduce((s, m) => s + (moduleTestCounts[m.id] ?? 0), 0), [modules, moduleTestCounts]);
 
-    // Subscribe to localStorage 'storage' events so the map updates when
-    // the user toggles a module on the modules index page in another tab
-    // or in the same tab. The storage event fires for *other* documents
-    // only; for same-tab updates we also re-read on visibility change.
-    const [storageTick, setStorageTick] = useState(0);
-    useEffect(() => {
-        const onStorage = (e: StorageEvent) => {
-            if (!e.key || e.key.startsWith(`${PLATFORM_SLUG}.module-enabled.`)) {
-                setStorageTick((t) => t + 1);
-            }
-        };
-        const onVisible = () => {
-            if (document.visibilityState === "visible") setStorageTick((t) => t + 1);
-        };
-        window.addEventListener("storage", onStorage);
-        document.addEventListener("visibilitychange", onVisible);
-        return () => {
-            window.removeEventListener("storage", onStorage);
-            document.removeEventListener("visibilitychange", onVisible);
-        };
-    }, []);
-
     const moduleEnabledMap = useMemo(() => {
         const map: Record<string, boolean> = {};
-        for (const m of modules) {
-            const raw = typeof window === "undefined" ? null : window.localStorage.getItem(`${PLATFORM_SLUG}.module-enabled.${m.id}`);
-            map[m.id] = raw === null ? true : raw === "true";
-        }
+        for (const m of modules) map[m.id] = testPlanConfig.data?.modules?.[m.id]?.enabled ?? false;
         return map;
-        // storageTick re-triggers the read whenever a 'storage' event fires
-        // or the tab regains focus.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [modules, storageTick]);
-    const enabledModuleCount = modules.filter((m) => moduleEnabledMap[m.id] !== false).length;
+    }, [modules, testPlanConfig.data]);
+    const enabledModuleCount = modules.filter((m) => moduleEnabledMap[m.id] === true).length;
 
     // Latest run results for pass/fail stats
     const { data: latestResultsData } = useQuery({
