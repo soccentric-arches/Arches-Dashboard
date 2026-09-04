@@ -26,7 +26,7 @@ export default function ModulePage() {
     });
     const fallbackModule = useMemo(() => modulesForOfflineDisplay(undefined).find((item) => item.id === moduleId), [moduleId]);
 
-    if (isLoading) return <div className="h-80 animate-pulse rounded-2xl bg-white/65 dark:bg-zinc-900/55" />;
+    if (isLoading) return <div className="skeleton h-80 rounded-2xl" />;
 
     if ((isError || !module) && fallbackModule) {
         return <ModuleWorkspace key={fallbackModule.id} module={fallbackModule} />;

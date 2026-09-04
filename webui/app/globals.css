@@ -213,6 +213,21 @@ textarea {
   outline-color: hsl(var(--ring));
 }
 
+/* Page titles get their own weight/tracking so they read as a clear
+   top-level heading instead of blending with card titles below them. */
+h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Translucent glass cards in dark mode wash out a thin focus ring, so
+   widen the offset and add a soft glow behind it to keep keyboard focus
+   visible against the ambient background glows. */
+.dark :focus-visible {
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.25);
+}
+
 /* ─── Expand panel animation ──────────────────────────────────────── */
 @keyframes expand-down {
   from {
@@ -245,4 +260,32 @@ textarea {
 
 .animate-fade-in {
   animation: fade-in-up 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Shimmer skeleton — replaces flat animate-pulse placeholders ── */
+@keyframes shimmer {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
+}
+
+.skeleton {
+  background-image: linear-gradient(100deg,
+      hsl(var(--muted)) 40%,
+      hsl(var(--muted-foreground) / 0.15) 50%,
+      hsl(var(--muted)) 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background-image: none;
+    background-color: hsl(var(--muted));
+  }
 }

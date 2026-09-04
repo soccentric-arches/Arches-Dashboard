@@ -193,7 +193,7 @@ function ModulesContent() {
             {
                 isLoading && !modules.length && (
                     <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {Array.from({ length: 10 }).map((_, index) => <div key={index} className="h-44 animate-pulse rounded-xl bg-muted" />)}
+                        {Array.from({ length: 10 }).map((_, index) => <div key={index} className="skeleton h-44 rounded-xl" />)}
                     </section>
                 )
             }

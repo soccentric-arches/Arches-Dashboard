@@ -127,7 +127,7 @@ export default function RunsPage() {
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <TableRow key={i}>
                                         <TableCell colSpan={8}>
-                                            <div className="h-8 animate-pulse rounded bg-muted" />
+                                            <div className="skeleton h-8 rounded" />
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -187,10 +187,15 @@ export default function RunsPage() {
                             {!isLoading && runs.length === 0 && (
                                 <TableRow>
                                     <TableCell colSpan={8} className="py-12 text-center text-muted-foreground">
-                                        No runs found
-                                        {(modeFilter || statusFilter) && (
-                                            <span> with the current filters — <button type="button" className="underline" onClick={() => { setModeFilter(""); setStatusFilter(""); setPage(0); }}>clear filters</button></span>
-                                        )}.
+                                        <div className="flex flex-col items-center gap-2">
+                                            <History size={22} aria-hidden="true" className="text-muted-foreground/50" />
+                                            <span>
+                                                No runs found
+                                                {(modeFilter || statusFilter) && (
+                                                    <span> with the current filters — <button type="button" className="underline" onClick={() => { setModeFilter(""); setStatusFilter(""); setPage(0); }}>clear filters</button></span>
+                                                )}.
+                                            </span>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}

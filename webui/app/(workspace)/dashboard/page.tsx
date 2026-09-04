@@ -251,7 +251,7 @@ export default function DashboardPage() {
             {/* ── Stats row ── */}
             {liveModules.isLoading && !modules.length ? (
                 <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />)}
+                    {Array.from({ length: 4 }).map((_, i) => <div key={i} className="skeleton h-28 rounded-xl" />)}
                 </section>
             ) : (
                 <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, Bot, BarChart2, Battery, Cable, ChevronLeft, ChevronRight, Clock, Cpu, FileText, Gauge, HardDrive, History, LayoutDashboard, Monitor, Network, Settings, ShieldCheck, Zap } from "lucide-react";
+import { Activity, Bot, BarChart2, Battery, Cable, ChevronLeft, ChevronRight, Clock, Cpu, FileText, Gauge, HardDrive, History, LayoutDashboard, Monitor, Network, SearchX, Settings, ShieldCheck, Zap } from "lucide-react";
 import { getModules } from "@/lib/api";
 import { modulesForOfflineDisplay, writeCachedModules } from "@/lib/modules/catalog";
 import type { ModuleInfo } from "@/lib/types/api";
@@ -139,9 +139,16 @@ export function Sidebar({
   }, [onRegisterSearchFocus]);
 
   const topLevelLinkClass = cn(
-    "flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors",
+    "relative flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors",
     locked && "cursor-not-allowed opacity-60",
   );
+
+  // Left accent bar + highlight for the active top-level link, shared by
+  // Dashboard / Run History / AI-LLM / Reporting / Logs / Settings so the
+  // active item reads at a glance in a now-denser sidebar.
+  const activeLinkClass =
+    "bg-accent text-accent-foreground font-medium before:absolute before:left-0 before:top-1/2 before:h-4 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary";
+  const inactiveLinkClass = "text-muted-foreground hover:bg-accent hover:text-accent-foreground";
 
   return (
     <aside
@@ -183,12 +190,7 @@ export function Sidebar({
                   if (locked) event.preventDefault();
                 }}
                 aria-current={pathname === "/dashboard" ? "page" : undefined}
-                className={cn(
-                  topLevelLinkClass,
-                  pathname === "/dashboard"
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
+                className={cn(topLevelLinkClass, pathname === "/dashboard" ? activeLinkClass : inactiveLinkClass)}
               >
                 <LayoutDashboard size={16} aria-hidden="true" />
                 {!collapsed && "Dashboard"}
@@ -275,9 +277,16 @@ export function Sidebar({
               );
             })}
 
-            {grouped.length === 0 && (
-              <li className="px-2 py-1.5 text-xs text-muted-foreground">
-                {!collapsed && (isSearching ? "No matching modules." : "No modules available.")}
+            {grouped.length === 0 && !collapsed && (
+              <li className="flex flex-col items-center gap-1.5 px-2 py-4 text-center text-xs text-muted-foreground">
+                <SearchX size={18} aria-hidden="true" className="text-muted-foreground/60" />
+                {isSearching ? "No matching modules." : "No modules available."}
+              </li>
+            )}
+
+            {!collapsed && (
+              <li className="px-2 pb-1 pt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Workspace
               </li>
             )}
 
@@ -288,12 +297,7 @@ export function Sidebar({
                   if (locked) event.preventDefault();
                 }}
                 aria-current={pathname === "/runs" ? "page" : undefined}
-                className={cn(
-                  topLevelLinkClass,
-                  pathname === "/runs"
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
+                className={cn(topLevelLinkClass, pathname === "/runs" ? activeLinkClass : inactiveLinkClass)}
               >
                 <History size={16} aria-hidden="true" />
                 {!collapsed && "Run History"}
@@ -307,12 +311,7 @@ export function Sidebar({
                   if (locked) event.preventDefault();
                 }}
                 aria-current={pathname === "/ai-llm" ? "page" : undefined}
-                className={cn(
-                  topLevelLinkClass,
-                  pathname === "/ai-llm"
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
+                className={cn(topLevelLinkClass, pathname === "/ai-llm" ? activeLinkClass : inactiveLinkClass)}
               >
                 <Bot size={16} aria-hidden="true" />
                 {!collapsed && "AI/LLM"}
@@ -326,12 +325,7 @@ export function Sidebar({
                   if (locked) event.preventDefault();
                 }}
                 aria-current={pathname === "/reporting" ? "page" : undefined}
-                className={cn(
-                  topLevelLinkClass,
-                  pathname === "/reporting"
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
+                className={cn(topLevelLinkClass, pathname === "/reporting" ? activeLinkClass : inactiveLinkClass)}
               >
                 <BarChart2 size={16} aria-hidden="true" />
                 {!collapsed && "Reporting"}
@@ -345,12 +339,7 @@ export function Sidebar({
                   if (locked) event.preventDefault();
                 }}
                 aria-current={pathname === "/logs" ? "page" : undefined}
-                className={cn(
-                  topLevelLinkClass,
-                  pathname === "/logs"
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
+                className={cn(topLevelLinkClass, pathname === "/logs" ? activeLinkClass : inactiveLinkClass)}
               >
                 <FileText size={16} aria-hidden="true" />
                 {!collapsed && "Logs"}
@@ -366,12 +355,7 @@ export function Sidebar({
               if (locked) event.preventDefault();
             }}
             aria-current={pathname.startsWith("/settings") ? "page" : undefined}
-            className={cn(
-              topLevelLinkClass,
-              pathname.startsWith("/settings")
-                ? "bg-accent text-accent-foreground font-medium"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-            )}
+            className={cn(topLevelLinkClass, pathname.startsWith("/settings") ? activeLinkClass : inactiveLinkClass)}
           >
             <Settings size={16} aria-hidden="true" />
             {!collapsed && "Settings"}

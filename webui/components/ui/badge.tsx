@@ -13,6 +13,11 @@ const badgeVariants = cva(
                 outline: "text-foreground",
                 success: "border-transparent bg-success text-success-foreground shadow hover:bg-success/80",
                 warning: "border-transparent bg-warning text-warning-foreground shadow hover:bg-warning/80",
+                // Soft-tint chips: same status colors at low opacity, for use
+                // where a solid badge would be too loud (inline lists, cards).
+                "success-soft": "border-transparent bg-success/10 text-success hover:bg-success/15",
+                "destructive-soft": "border-transparent bg-destructive/10 text-destructive hover:bg-destructive/15",
+                "warning-soft": "border-transparent bg-warning/10 text-warning hover:bg-warning/15",
             },
         },
         defaultVariants: { variant: "default" },

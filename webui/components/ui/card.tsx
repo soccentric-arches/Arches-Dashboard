@@ -20,7 +20,7 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
     return (
         <h2
-            className={cn("font-semibold leading-none tracking-tight", className)}
+            className={cn("text-lg font-semibold leading-none tracking-tight", className)}
             {...props}
         />
     );

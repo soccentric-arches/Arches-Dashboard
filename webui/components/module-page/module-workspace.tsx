@@ -798,7 +798,12 @@ export function ModuleWorkspace({ module }: { module: ModuleInfo }) {
                                     ))}
                                     {moduleRuns.length === 0 && (
                                       <tr>
-                                        <td colSpan={5} className="px-3 py-5 text-center text-muted-foreground">No runs yet.</td>
+                                        <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
+                                          <div className="flex flex-col items-center gap-1.5">
+                                            <Activity size={20} aria-hidden="true" className="text-muted-foreground/50" />
+                                            No runs yet.
+                                          </div>
+                                        </td>
                                       </tr>
                                     )}
                                   </tbody>
