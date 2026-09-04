@@ -192,7 +192,7 @@ function ModulesContent() {
 
             {
                 isLoading && !modules.length && (
-                    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {Array.from({ length: 10 }).map((_, index) => <div key={index} className="h-44 animate-pulse rounded-xl bg-muted" />)}
                     </section>
                 )
@@ -212,12 +212,12 @@ function ModulesContent() {
                             <Badge variant="secondary" className="rounded-full px-2 text-xs tabular-nums">{mods.length}</Badge>
                             <span className="h-px flex-1 bg-border" />
                         </div>
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {mods.map((module) => {
                                 const enabled = moduleEnabled[module.id] !== false;
                                 const summary = moduleSummary[module.id] ?? null;
                                 return (
-                                    <Card key={module.id} className={cn("h-full transition-colors", !enabled && "opacity-60")}>
+                                    <Card key={module.id} className={cn("flex h-full flex-col transition-colors", !enabled && "opacity-60")}>
                                         <CardHeader>
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="flex flex-wrap items-center gap-1.5">
@@ -228,27 +228,30 @@ function ModulesContent() {
                                                         </Badge>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    <Switch
-                                                        checked={enabled}
-                                                        onClick={(e) => { e.preventDefault(); toggleEnabled(module.id); }}
-                                                        aria-label={enabled ? "Disable module" : "Enable module"}
-                                                    />
-                                                    <Link href={`/modules/${module.id}`} onClick={(e) => e.stopPropagation()}>
-                                                        <ArrowRight size={16} className="text-muted-foreground hover:text-foreground" />
-                                                    </Link>
-                                                </div>
+                                                <Link href={`/modules/${module.id}`} onClick={(e) => e.stopPropagation()} className="shrink-0">
+                                                    <ArrowRight size={16} className="text-muted-foreground hover:text-foreground" />
+                                                </Link>
                                             </div>
                                             <CardTitle>{module.name || module.id}</CardTitle>
                                             <CardDescription className="line-clamp-2">
                                                 {module.description || "No module description supplied by the server."}
                                             </CardDescription>
                                         </CardHeader>
-                                        <CardContent className="space-y-2 text-xs text-muted-foreground">
-                                            <div className="flex justify-between gap-3"><span>Version</span><span>{module.version || "n/a"}</span></div>
-                                            <div className="flex justify-between gap-3">
-                                                <span>Last test run</span>
-                                                <span>{summary ? formatRunTime(summary.lastRun) : "No runs yet"}</span>
+                                        <CardContent className="flex flex-1 flex-col justify-between space-y-2 text-xs text-muted-foreground">
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between gap-3"><span>Version</span><span>{module.version || "n/a"}</span></div>
+                                                <div className="flex justify-between gap-3">
+                                                    <span>Last test run</span>
+                                                    <span>{summary ? formatRunTime(summary.lastRun) : "No runs yet"}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-end gap-2 pt-2">
+                                                <span>{enabled ? "On" : "Off"}</span>
+                                                <Switch
+                                                    checked={enabled}
+                                                    onClick={(e) => { e.preventDefault(); toggleEnabled(module.id); }}
+                                                    aria-label={enabled ? "Disable module" : "Enable module"}
+                                                />
                                             </div>
                                         </CardContent>
                                     </Card>

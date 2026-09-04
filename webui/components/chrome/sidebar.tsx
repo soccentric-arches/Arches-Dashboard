@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, Battery, Cable, ChevronLeft, ChevronRight, Clock, Cpu, FileText, Gauge, HardDrive, History, LayoutDashboard, Monitor, Network, Settings, ShieldCheck, Zap } from "lucide-react";
+import { Activity, Bot, BarChart2, Battery, Cable, ChevronLeft, ChevronRight, Clock, Cpu, FileText, Gauge, HardDrive, History, LayoutDashboard, Monitor, Network, Settings, ShieldCheck, Zap } from "lucide-react";
 import { getModules } from "@/lib/api";
 import { modulesForOfflineDisplay, writeCachedModules } from "@/lib/modules/catalog";
 import type { ModuleInfo } from "@/lib/types/api";
@@ -255,7 +255,7 @@ export function Sidebar({
                               className={cn(
                                 "flex items-center gap-2 rounded-md text-sm transition-colors",
                                 !collapsed &&
-                                  "relative py-1.5 pl-4 pr-2 before:absolute before:left-0 before:top-1/2 before:h-px before:w-2.5 before:-translate-y-1/2 before:bg-border",
+                                "relative py-1.5 pl-4 pr-2 before:absolute before:left-0 before:top-1/2 before:h-px before:w-2.5 before:-translate-y-1/2 before:bg-border",
                                 collapsed && "ml-1.5 h-8 w-8 justify-center",
                                 active
                                   ? "bg-accent text-accent-foreground font-medium"
@@ -297,6 +297,44 @@ export function Sidebar({
               >
                 <History size={16} aria-hidden="true" />
                 {!collapsed && "Run History"}
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href={locked ? pathname : "/ai-llm"}
+                onClick={(event) => {
+                  if (locked) event.preventDefault();
+                }}
+                aria-current={pathname === "/ai-llm" ? "page" : undefined}
+                className={cn(
+                  topLevelLinkClass,
+                  pathname === "/ai-llm"
+                    ? "bg-accent text-accent-foreground font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                )}
+              >
+                <Bot size={16} aria-hidden="true" />
+                {!collapsed && "AI/LLM"}
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href={locked ? pathname : "/reporting"}
+                onClick={(event) => {
+                  if (locked) event.preventDefault();
+                }}
+                aria-current={pathname === "/reporting" ? "page" : undefined}
+                className={cn(
+                  topLevelLinkClass,
+                  pathname === "/reporting"
+                    ? "bg-accent text-accent-foreground font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                )}
+              >
+                <BarChart2 size={16} aria-hidden="true" />
+                {!collapsed && "Reporting"}
               </Link>
             </li>
 

@@ -156,6 +156,7 @@ body {
    Kept to color/background/border/shadow/transform — never layout
    properties — so it can't introduce jank. */
 @media (prefers-reduced-motion: no-preference) {
+
   a,
   button,
   input,
@@ -170,6 +171,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

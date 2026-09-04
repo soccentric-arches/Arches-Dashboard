@@ -57,8 +57,10 @@ function toChartRows(results: TestResult[]) {
 type TestValue = boolean | number | string;
 type TestPlanState = Record<string, { enabled: boolean; fields: Record<string, TestValue> }>;
 
+// v2: tests default to disabled now, so a plan saved under the old key
+// (tests enabled by default) is intentionally not read back here.
 function testPlanStorageKey(moduleId: string): string {
-  return `${PLATFORM_SLUG}.module-tests.${moduleId}`;
+  return `${PLATFORM_SLUG}.module-tests.v2.${moduleId}`;
 }
 
 function moduleEnabledStorageKey(moduleId: string): string {
