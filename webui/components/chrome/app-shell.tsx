@@ -192,8 +192,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [lockNavigation, pathname, router]);
 
+  // No background on this wrapper on purpose: the body paints the base
+  // color and (in dark mode) the ambient glows, so translucent chrome
+  // and card surfaces can pick them up.
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <TopBar
         mode={mode}
         setMode={(nextMode) => {

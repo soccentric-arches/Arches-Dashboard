@@ -65,7 +65,7 @@ export function TopBar({
   const elapsedLabel = runningSince ? formatElapsed((now - runningSince) / 1000) : "00:00";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       {/* Primary bar */}
       <div className="flex h-14 items-center justify-between px-5">
         {/* Brand */}

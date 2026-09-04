@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Class-based dark mode so Tailwind's `dark:` variant follows the theme
+   toggle (the `.dark` class on <html>) instead of only the OS setting —
+   the toggle is the authoritative control (see theme-toggle.tsx). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ─── shadcn/ui design tokens ─────────────────────────────────────── */
 :root {
   color-scheme: light;
@@ -30,6 +35,9 @@
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
   --radius: 0.5rem;
+  /* Opaque card surface in light mode. Overridden to translucent in
+     .dark so the ambient body glows show through (glass effect). */
+  --alpha-card: 1;
 }
 
 @media (min-width: 48rem) {
@@ -42,7 +50,13 @@
   color-scheme: dark;
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
+  /* Slightly lighter than --background so translucent glass panels
+     (see --alpha-card) still read as elevated surfaces over the
+     ambient glows. */
+  --card: 240 9% 6%;
+  /* --alpha-card below makes card surfaces translucent; the matching
+     backdrop blur lives on `.dark .bg-card` further down. */
+  --alpha-card: 0.72;
   --card-foreground: 0 0% 98%;
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
@@ -68,8 +82,10 @@
   --success-foreground: 144.9 80.4% 10%;
   --warning: 32 95% 50%;
   --warning-foreground: 20 14.3% 4.1%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
+  /* Lifted from 15.9% so glass panel edges stay visible against the
+     ambient glows behind them. */
+  --border: 240 5% 18%;
+  --input: 240 5% 18%;
   --ring: 240 4.9% 83.9%;
 }
 
@@ -77,7 +93,9 @@
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
+  /* / var(--alpha-card, 1) lets dark mode dial the card surface down to
+     translucent glass while light mode stays fully opaque. */
+  --color-card: hsl(var(--card) / var(--alpha-card, 1));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
@@ -118,6 +136,29 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ─── Dark-mode ambience: soft aurora glows behind translucent UI ───
+   The app shell paints no background of its own, so these gradients
+   show through every translucent surface (top bar, sidebar, cards).
+   Fixed attachment keeps the glows stationary while the page scrolls,
+   which is what sells the glass effect. */
+.dark body {
+  background-attachment: fixed;
+  background-image:
+    radial-gradient(52rem 34rem at 12% -8%, hsl(255 85% 60% / 0.10), transparent 65%),
+    radial-gradient(46rem 30rem at 105% 12%, hsl(190 90% 45% / 0.08), transparent 60%),
+    radial-gradient(60rem 42rem at 50% 118%, hsl(285 80% 55% / 0.07), transparent 65%);
+}
+
+/* Card surfaces are translucent in dark mode (--alpha-card); blur
+   whatever is behind them so overlaid content stays legible. Scoped
+   to the `.bg-card` utility so every card-like surface — Card, the
+   help dialog panel, page-level summaries — picks this up without
+   each component remembering to add backdrop-blur. */
+.dark .bg-card {
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 
 button,

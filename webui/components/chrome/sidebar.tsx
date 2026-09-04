@@ -147,7 +147,7 @@ export function Sidebar({
     <aside
       aria-label="Sidebar"
       className={cn(
-        "sticky top-[var(--shell-header-height)] h-[calc(100vh-var(--shell-header-height))] border-r border-border bg-background transition-[width]",
+        "sticky top-[var(--shell-header-height)] h-[calc(100vh-var(--shell-header-height))] border-r border-border bg-background/80 backdrop-blur-md transition-[width]",
         collapsed ? "w-[60px]" : "w-[280px]",
       )}
     >
