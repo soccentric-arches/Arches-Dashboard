@@ -12,6 +12,8 @@ TAG      ?= latest
 PORT     ?= 3010
 CONTEXT  ?= ..                   # build context = repo root
 DOCKERFILE ?= $(CURDIR)/Dockerfile
+# Primary LAN IP — used to print the network-reachable URL after `make run`.
+HOST_IP ?= $(strip $(shell hostname -I 2>/dev/null | awk '{print $$1}'))
 
 .PHONY: build run stop logs shell clean
 
@@ -22,14 +24,18 @@ build:
 		--tag $(IMAGE):$(TAG) \
 		$(CONTEXT)
 
-## run — run the container in detached mode
+## run — run the container in detached mode (replaces any existing one)
+## Port is published on 0.0.0.0 so the app is reachable from other hosts.
 run:
+	docker rm -f $(IMAGE) 2>/dev/null || true
 	docker run -d \
 		--name $(IMAGE) \
-		--publish $(PORT):3010 \
+		--publish 0.0.0.0:$(PORT):3010 \
 		--restart unless-stopped \
 		$(IMAGE):$(TAG)
-	@echo "Dashboard running at http://localhost:$(PORT)"
+	@echo "Dashboard running at:"
+	@echo "  local:   http://localhost:$(PORT)"
+	@if [ -n "$(HOST_IP)" ]; then echo "  network: http://$(HOST_IP):$(PORT)"; fi
 
 ## stop — stop and remove the container
 stop:

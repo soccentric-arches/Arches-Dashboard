@@ -3,6 +3,8 @@
 #
 # Targets:
 #   dev          start the Next.js dev server (hot-reload, port 3010)
+#   run          build and run the app in Docker (port 3010)
+#   stop         stop and remove the container
 #   build        build in Docker (alias for docker-build)
 #   test         run Vitest unit tests
 #   lint         run Next.js ESLint
@@ -29,7 +31,7 @@ TAG      ?= latest
 install: ## install npm dependencies
 	cd $(WEBUI) && npm install
 
-dev: ## start Next.js development server
+dev: ## start Next.js development server (local, no Docker)
 	cd $(WEBUI) && npm run dev
 
 build: docker-build ## Build in Docker (fleet standard)
@@ -67,7 +69,10 @@ docker-clean: ## remove the image
 # Same verbs mean the same thing in every repo; these forward to this
 # repo's own targets rather than duplicating their recipes.
 .PHONY: run
-run: dev ## Alias for dev
+run: docker-build docker-run ## Build (cached) and run the container — the standard way to run the app
+
+.PHONY: stop
+stop: docker-stop ## Stop and remove the container
 
 # ── Help ──────────────────────────────────────────────────────────────────────
 # Targets are self-documenting: text after `## ` on a target line is picked up
