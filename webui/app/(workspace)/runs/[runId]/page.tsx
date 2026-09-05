@@ -55,7 +55,7 @@ export default function RunDetailPage() {
     }).length;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div>

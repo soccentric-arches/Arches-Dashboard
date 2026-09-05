@@ -203,7 +203,7 @@ export default function DashboardPage() {
     const pagedModules = modules.slice(inventoryPage * PAGE_SIZE, (inventoryPage + 1) * PAGE_SIZE);
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div>

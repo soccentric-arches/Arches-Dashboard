@@ -342,7 +342,7 @@ export default function SettingsPage() {
     catch { /* ignore */ }
 
     return (
-        <div className="grid items-start gap-4">
+        <div className="grid items-start gap-5">
 
             {/* ── 1. Server Connection ── */}
             <SectionCard title="Server Connection">

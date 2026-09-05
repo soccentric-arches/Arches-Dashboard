@@ -159,7 +159,7 @@ export function Sidebar({
       )}
     >
       <div className="flex h-full flex-col">
-        <div className="border-b border-border p-3">
+        <div className="border-b border-border p-4">
           <div className="flex items-center justify-between gap-2">
             {!collapsed && (
               <input
@@ -181,7 +181,7 @@ export function Sidebar({
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-2">
+        <div className="flex-1 overflow-auto p-3">
           <ul className="space-y-0.5">
             <li>
               <Link
@@ -348,7 +348,7 @@ export function Sidebar({
           </ul>
         </div>
 
-        <div className="border-t border-border p-2">
+        <div className="border-t border-border p-3">
           <Link
             href={locked ? pathname : "/settings"}
             onClick={(event) => {

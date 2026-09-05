@@ -63,9 +63,10 @@ export function TopBar({
   const elapsedLabel = runningSince ? formatElapsed((now - runningSince) / 1000) : "00:00";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      {/* Primary bar */}
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
+    <header className="sticky top-0 z-30 mx-auto max-w-6xl border-x border-b border-border bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+      {/* Primary bar — contained to the same fixed width as the
+          sidebar+content frame below it, not the full page. */}
+      <div className="flex h-14 items-center justify-between px-6">
         {/* Brand */}
         <Link
           href="/dashboard"
@@ -115,7 +116,7 @@ export function TopBar({
       </div>
 
       {/* Mobile nav strip */}
-      <nav className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto border-t border-border/50 px-3 pb-1.5 pt-1 md:hidden" aria-label="Mobile navigation">
+      <nav className="flex items-center gap-1 overflow-x-auto border-t border-border/50 px-3 pb-1.5 pt-1 md:hidden" aria-label="Mobile navigation">
         {NAV_ITEMS.map(({ href, label, icon: Icon, matchPrefix }) => {
           const active = matchPrefix ? pathname.startsWith(matchPrefix) : pathname === href || pathname.startsWith(href + "/");
           return (

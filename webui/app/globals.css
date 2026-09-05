@@ -15,14 +15,15 @@
   --card-foreground: 240 10% 3.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
+  /* Theme color: light orange. */
+  --primary: 28 92% 54%;
+  --primary-foreground: 20 45% 12%;
   --secondary: 240 4.8% 95.9%;
   --secondary-foreground: 240 5.9% 10%;
   --muted: 240 4.8% 95.9%;
   --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --accent: 28 85% 94%;
+  --accent-foreground: 20 60% 22%;
   /* Darker destructive so destructive-foreground (white) hits WCAG AA
      4.5:1 in light mode. 0 72% 42% against white is ~6.0:1. */
   --destructive: 0 72% 42%;
@@ -33,7 +34,7 @@
   --warning-foreground: 0 0% 98%;
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
+  --ring: 28 92% 54%;
   --radius: 0.5rem;
   /* Slightly translucent even in light mode so the ambient glow behind
      it (see "body" below) reads as glass rather than a flat panel. */
@@ -60,14 +61,15 @@
   --card-foreground: 0 0% 98%;
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
+  /* Theme color: light orange, lifted slightly for legibility on dark bg. */
+  --primary: 28 90% 58%;
+  --primary-foreground: 20 45% 10%;
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 98%;
   --muted: 240 3.7% 15.9%;
   --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 28 45% 20%;
+  --accent-foreground: 28 90% 88%;
   /* Lighter destructive in dark mode so destructive-foreground (white)
      hits WCAG AA 4.5:1. The old 0 62.8% 30.6% against white is
      ~5.0:1, but the badge foreground in the previous token was using
@@ -86,7 +88,7 @@
      ambient glows behind them. */
   --border: 240 5% 18%;
   --input: 240 5% 18%;
-  --ring: 240 4.9% 83.9%;
+  --ring: 28 90% 58%;
 }
 
 /* ─── Tailwind v4 theme mapping ───────────────────────────────────── */

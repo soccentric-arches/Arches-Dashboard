@@ -53,7 +53,7 @@ export default function RunsPage() {
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             {/* ── Header ── */}
             <Card>
                 <CardHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

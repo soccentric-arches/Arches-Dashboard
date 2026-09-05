@@ -139,7 +139,7 @@ function ModulesContent() {
     );
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <Card>
                 <CardHeader className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
@@ -193,7 +193,7 @@ function ModulesContent() {
 
             {
                 isLoading && !modules.length && (
-                    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {Array.from({ length: 10 }).map((_, index) => <div key={index} className="skeleton h-44 rounded-xl" />)}
                     </section>
                 )
@@ -213,7 +213,7 @@ function ModulesContent() {
                             <Badge variant="secondary" className="rounded-full px-2 text-xs tabular-nums">{mods.length}</Badge>
                             <span className="h-px flex-1 bg-border" />
                         </div>
-                        <div className="stagger grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {mods.map((module) => {
                                 const enabled = moduleEnabled[module.id] !== false;
                                 const summary = moduleSummary[module.id] ?? null;
